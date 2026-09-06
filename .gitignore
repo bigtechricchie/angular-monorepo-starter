@@ -1,12 +1,18 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
 # Dependencies
-node_modules/
+/node_modules
 
 # Angular
-.angular/
-dist/
+/.angular
 
 # Test output
-coverage/
+/coverage
+__screenshots__/
 
 # Environment files
 .env
@@ -16,11 +22,28 @@ coverage/
 # Logs
 *.log
 
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.swp
+*.swo
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
+
 # Operating systems
 .DS_Store
 Thumbs.db
-
-# Editors
-.idea/
-*.swp
-*.swo
