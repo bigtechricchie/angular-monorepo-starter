@@ -1,0 +1,11 @@
+{
+  "name": "angular-monorepo-starter",
+  "version": "0.0.0",
+  "description": "A security-conscious Angular and Go monorepo starter designed for fast prototyping and clear application boundaries.",
+  "private": true,
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4"
+  }
+}
