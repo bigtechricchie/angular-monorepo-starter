@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Angular
+.angular/
+dist/
+
+# Test output
+coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+*.swp
+*.swo
