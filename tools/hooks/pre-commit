@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SECRET_PATTERN='(API_KEY|SECRET_KEY|AUTH_TOKEN|ACCESS_TOKEN|PASSWORD)[[:space:]]*[:=][[:space:]]*[^[:space:]]+'
+PRIVATE_KEY_PATTERN='-----BEGIN[[:space:]]+([A-Z0-9]+[[:space:]]+)?PRIVATE[[:space:]]+KEY-----'
+
+if git diff --cached --no-ext-diff --unified=0 --no-color \
+  | grep -qiE "$SECRET_PATTERN"; then
+  echo "Potential secret assignment detected in staged changes."
+  exit 1
+fi
+
+if git diff --cached --no-ext-diff --unified=0 --no-color \
+  | grep -qiE "$PRIVATE_KEY_PATTERN"; then
+  echo "Potential private key material detected in staged changes."
+  exit 1
+fi
