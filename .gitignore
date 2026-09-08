@@ -3,6 +3,7 @@
 /tmp
 /out-tsc
 /bazel-out
+services/api/api.exe
 
 # Dependencies
 /node_modules
