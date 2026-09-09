@@ -8,6 +8,11 @@
     "node": "24.20.0",
     "pnpm": "12.3.4"
   },
+  "scripts": {
+    "dev:reference-app": "ng serve reference-app",
+    "build:reference-app": "ng build reference-app",
+    "test:reference-app": "ng test reference-app"
+  },
   "dependencies": {
     "@angular/common": "22.1.5",
     "@angular/compiler": "22.1.5",
@@ -19,8 +24,11 @@
     "tslib": "2.8.1"
   },
   "devDependencies": {
+    "@angular/build": "22.1.6",
     "@angular/cli": "22.1.6",
     "@angular/compiler-cli": "22.1.5",
-    "typescript": "6.0.2"
+    "jsdom": "28.0.0",
+    "typescript": "6.0.2",
+    "vitest": "4.0.8"
   }
 }

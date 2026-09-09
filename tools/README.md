@@ -1,7 +1,7 @@
 # Tools
 
 Workspace tooling. Everything used to set up, verify, or maintain this
-repository — not part of the applications or libraries themselves.
+repository - not part of the applications or libraries themselves.
 
 ```text
 tools/
@@ -11,7 +11,7 @@ tools/
 
 ## hooks/
 
-Three plain shell scripts, run natively by Git — no Husky and no runtime
+Three plain shell scripts, run natively by Git - no Husky and no runtime
 dependency:
 
 | Hook         | What it does                                    |
