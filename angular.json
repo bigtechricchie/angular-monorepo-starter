@@ -59,7 +59,8 @@
               "buildTarget": "reference-app:build:production"
             },
             "development": {
-              "buildTarget": "reference-app:build:development"
+              "buildTarget": "reference-app:build:development",
+              "proxyConfig": "projects/reference-app/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
