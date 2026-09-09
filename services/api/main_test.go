@@ -13,7 +13,7 @@ func TestHealthEndpoint(t *testing.T) {
 		},
 	}
 
-	request := httptest.NewRequest(http.MethodGet, "/health", nil)
+	request := httptest.NewRequest(http.MethodGet, "/api/health", nil)
 	response := httptest.NewRecorder()
 
 	app.routes().ServeHTTP(response, request)
@@ -65,7 +65,7 @@ func TestHealthEndpointRejectsUnsupportedMethod(t *testing.T) {
 		},
 	}
 
-	request := httptest.NewRequest(http.MethodPost, "/health", nil)
+	request := httptest.NewRequest(http.MethodPost, "/api/health", nil)
 	response := httptest.NewRecorder()
 
 	app.routes().ServeHTTP(response, request)

@@ -2,20 +2,26 @@
 
 `services/api` is the starter repository's Go HTTP API.
 
-It provides the smallest useful backend starting point for local development and
-future application features while keeping the initial implementation simple,
-explicit, and standard-library first.
+It provides the smallest useful backend starting point for local development and future application features while keeping the initial implementation simple, explicit, and standard-library first.
 
 The service currently exposes:
 
 ```text
-GET /health
+GET /api/health
 ```
 
 which returns:
 
 ```json
 {"status":"ok"}
+```
+
+The endpoint contract includes:
+
+```text
+200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
 ```
 
 ## Requirements
@@ -53,14 +59,12 @@ Override the port with the `PORT` environment variable:
 PORT=5050 go run .
 ```
 
-An invalid `PORT` value (non-numeric, or outside the `1–65535` range) causes
-the service to log an error and exit rather than starting on an unexpected
-port.
+An invalid `PORT` value that is non-numeric or outside the `1–65535` range causes the service to log an error and exit rather than starting on an unexpected port.
 
 Verify the health endpoint:
 
 ```bash
-curl -i http://localhost:4000/health
+curl -i http://localhost:4000/api/health
 ```
 
 Expected response body:
@@ -113,8 +117,7 @@ go build ./...
 
 This is intentionally a small starter API.
 
-The current implementation uses only the Go standard library and does not yet
-include:
+The current implementation uses only the Go standard library and does not yet include:
 
 * database persistence;
 * authentication or authorization;
@@ -122,8 +125,7 @@ include:
 * third-party HTTP frameworks;
 * background workers;
 * queues;
-* generalized middleware;
+* general-purpose middleware;
 * graceful shutdown.
 
-Those capabilities should be introduced only when a concrete application
-requirement justifies them.
+Those capabilities should be introduced only when a concrete application requirement justifies them.

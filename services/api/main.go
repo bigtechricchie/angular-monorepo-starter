@@ -94,7 +94,7 @@ func getEnvironmentPort() (int, error) {
 func (app *application) routes() http.Handler {
 	router := http.NewServeMux()
 
-	router.HandleFunc("GET /health", app.healthHandler)
+	router.HandleFunc("GET /api/health", app.healthHandler)
 
 	return router
 }
