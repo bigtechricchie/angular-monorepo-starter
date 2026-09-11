@@ -1,0 +1,28 @@
+<main>
+  <h1>Health check</h1>
+
+  <p>Verify that the reference application can reach the Go API.</p>
+
+  <button type="button" [disabled]="healthCheck().state === states.loading" (click)="checkHealth()">
+    Check API health
+  </button>
+
+  @let current = healthCheck();
+
+  @switch (current.state) {
+  @case (states.loading) {
+  <p>Checking API health...</p>
+  }
+
+  @case (states.success) {
+  <p>
+    API status:
+    <strong>{{ current.status }}</strong>
+  </p>
+  }
+
+  @case (states.error) {
+  <p role="alert">{{ current.message }}</p>
+  }
+  }
+</main>
