@@ -3,8 +3,10 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'health',
+    loadComponent: () =>
+      import('./pages/home/home').then(
+        (module) => module.Home,
+      ),
   },
   {
     path: 'health',
