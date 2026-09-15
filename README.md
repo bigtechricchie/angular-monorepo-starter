@@ -89,6 +89,8 @@ pnpm run test:reference-app
 
 The generic Go API is documented separately in `services/api/README.md`.
 
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the approved workflow for generating Angular applications and introducing pages or shared capabilities.
+
 ## License
 
 MIT

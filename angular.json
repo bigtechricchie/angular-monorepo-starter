@@ -18,12 +18,6 @@
           "options": {
             "browser": "projects/reference-app/src/main.ts",
             "tsConfig": "projects/reference-app/tsconfig.app.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "projects/reference-app/public"
-              }
-            ],
             "styles": [
               "projects/reference-app/src/styles/styles.css"
             ]
@@ -61,6 +55,63 @@
             "development": {
               "buildTarget": "reference-app:build:development",
               "proxyConfig": "projects/reference-app/proxy.conf.json"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    },
+    "portal-app": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/portal-app",
+      "sourceRoot": "projects/portal-app/src",
+      "prefix": "app-portal",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/portal-app/src/main.ts",
+            "tsConfig": "projects/portal-app/tsconfig.app.json",
+            "styles": [
+              "projects/portal-app/src/styles/styles.css"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "portal-app:build:production"
+            },
+            "development": {
+              "buildTarget": "portal-app:build:development"
             }
           },
           "defaultConfiguration": "development"

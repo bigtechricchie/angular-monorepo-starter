@@ -11,7 +11,10 @@
   "scripts": {
     "dev:reference-app": "ng serve reference-app",
     "build:reference-app": "ng build reference-app",
-    "test:reference-app": "ng test reference-app"
+    "test:reference-app": "ng test reference-app",
+    "dev:portal-app": "ng serve portal-app",
+    "build:portal-app": "ng build portal-app",
+    "test:portal-app": "ng test portal-app"
   },
   "dependencies": {
     "@angular/common": "22.1.5",
