@@ -1,0 +1,38 @@
+.app {
+  min-block-size: 100vh;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1rem;
+  padding-inline: 1rem;
+}
+
+.app__title {
+  margin: 0;
+}
+
+.app__navigation {
+  display: flex;
+  gap: 1rem;
+}
+
+.app__navigation-link {
+  text-decoration: none;
+
+  &.app__navigation-link--active {
+    font-weight: 700;
+  }
+}
+
+.app__main {
+  flex: 1;
+  padding-block: 1rem;
+  padding-inline: 1rem;
+}

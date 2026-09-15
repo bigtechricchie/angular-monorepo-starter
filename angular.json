@@ -25,7 +25,7 @@
               }
             ],
             "styles": [
-              "projects/reference-app/src/styles.css"
+              "projects/reference-app/src/styles/styles.css"
             ]
           },
           "configurations": {

@@ -1,2 +1,20 @@
-<h1>{{ title() }}</h1>
-<router-outlet />
+<div class="app">
+  <header class="app__header">
+    <h1 class="app__title">Reference App</h1>
+
+    <nav class="app__navigation" aria-label="Primary navigation">
+      <a class="app__navigation-link" routerLink="/" routerLinkActive="app__navigation-link--active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        Home
+      </a>
+
+      <a class="app__navigation-link" routerLink="/health" routerLinkActive="app__navigation-link--active">
+        Health
+      </a>
+    </nav>
+  </header>
+
+  <main class="app__main">
+    <router-outlet />
+  </main>
+</div>
