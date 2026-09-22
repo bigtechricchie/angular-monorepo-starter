@@ -23,15 +23,33 @@ The application is available at:
 http://localhost:4201
 ```
 
-The Angular development server proxies `/api/**` requests to the Go API at `http://localhost:4000`.
+The Angular development server proxies `/api/**` requests to the Go API at
+`http://localhost:4000`.
+
+## Test
+
+Run the Portal test suite:
+
+```bash
+pnpm exec ng test portal-app --watch=false
+```
+
+## Build
+
+Create a production build:
+
+```bash
+pnpm exec ng build portal-app
+```
 
 ## Routes
 
 ```text
-/health
+/         → Home
+/health   → Health check
 ```
 
-Provides a simple API health check against:
+The health check calls:
 
 ```text
 GET /api/health
