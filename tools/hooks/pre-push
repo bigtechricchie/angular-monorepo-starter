@@ -2,3 +2,56 @@
 set -euo pipefail
 
 pnpm audit --audit-level=high
+
+run_reference=false
+run_portal=false
+run_all=false
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Branch/tag deletion: there is no local commit to test.
+  if [[ "$local_sha" =~ ^0+$ ]]; then
+    continue
+  fi
+
+  # New remote ref: there is no previous remote SHA to diff against safely.
+  if [[ "$remote_sha" =~ ^0+$ ]]; then
+    run_all=true
+    continue
+  fi
+
+  changed_files=$(git diff --name-only "$remote_sha..$local_sha")
+
+  if grep -qE '^(angular\.json|package\.json|pnpm-lock\.yaml|tsconfig\.json)$' <<< "$changed_files"; then
+    run_all=true
+  fi
+
+  if grep -q '^tools/' <<< "$changed_files"; then
+    run_all=true
+  fi
+
+  if grep -q '^libs/' <<< "$changed_files"; then
+    run_all=true
+  fi
+
+  if grep -q '^projects/reference-app/' <<< "$changed_files"; then
+    run_reference=true
+  fi
+
+  if grep -q '^projects/portal-app/' <<< "$changed_files"; then
+    run_portal=true
+  fi
+done
+
+if [ "$run_all" = true ]; then
+  pnpm exec ng test reference-app --watch=false
+  pnpm exec ng test portal-app --watch=false
+  exit 0
+fi
+
+if [ "$run_reference" = true ]; then
+  pnpm exec ng test reference-app --watch=false
+fi
+
+if [ "$run_portal" = true ]; then
+  pnpm exec ng test portal-app --watch=false
+fi
