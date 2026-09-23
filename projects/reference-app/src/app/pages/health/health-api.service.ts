@@ -2,25 +2,34 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
-const invalidResponseMessage = 'Response could not be parsed.';
-const requestFailedMessage = 'Request failed.';
-
 const healthStatuses = {
   ok: 'ok',
 } as const;
 
+const invalidResponseMessage = 'Response could not be parsed.';
+const requestFailedMessage = 'Request failed.';
+
 interface HealthResponse {
   status: typeof healthStatuses.ok;
+}
+
+function isHealthResponse(value: unknown): value is HealthResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'status' in value &&
+    value.status === healthStatuses.ok
+  );
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class HealthApiService {
-  private readonly httpClient = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   checkHealth(): Observable<HealthResponse> {
-    return this.httpClient.get<unknown>('/api/health').pipe(
+    return this.http.get<unknown>('/api/health').pipe(
       map((response) => {
         if (!isHealthResponse(response)) {
           throw new Error(invalidResponseMessage);
@@ -40,15 +49,4 @@ export class HealthApiService {
       }),
     );
   }
-}
-
-function isHealthResponse(value: unknown): value is HealthResponse {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  return (
-    'status' in value &&
-    value.status === healthStatuses.ok
-  );
 }

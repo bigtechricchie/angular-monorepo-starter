@@ -1,25 +1,25 @@
-<section class="health">
-  <h1>Health check</h1>
+<section>
+  <h2>Health check</h2>
 
   <p>Check whether the API is available.</p>
 
-  @let current = healthCheck();
+  @let healthCheckState = healthCheck();
 
-  <button type="button" [disabled]="current.state === states.loading" (click)="checkHealth()">
-    Check API
+  <button type="button" [disabled]="healthCheckState.state === states.loading" (click)="checkHealth()">
+    Check API health
   </button>
 
-  @switch (current.state) {
+  @switch (healthCheckState.state) {
   @case (states.loading) {
-  <p>Checking API…</p>
+  <p>Checking API health…</p>
   }
 
   @case (states.success) {
-  <p>API status: {{ current.status }}</p>
+  <p>API status: <strong>{{ healthCheckState.status }}</strong></p>
   }
 
   @case (states.error) {
-  <p>Health check failed: {{ current.message }}</p>
+  <p role="alert">Health check failed: {{ healthCheckState.message }}</p>
   }
   }
 </section>

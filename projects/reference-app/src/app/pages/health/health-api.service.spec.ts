@@ -9,28 +9,25 @@ import { HealthApiService } from './health-api.service';
 
 describe('HealthApiService', () => {
   let service: HealthApiService;
-  let httpTestingController: HttpTestingController;
+  let httpController: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        HealthApiService,
-        provideHttpClientTesting(),
-      ],
+      providers: [provideHttpClientTesting()],
     });
 
     service = TestBed.inject(HealthApiService);
-    httpTestingController = TestBed.inject(HttpTestingController);
+    httpController = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    httpTestingController.verify();
+    httpController.verify();
   });
 
-  it('returns a valid health response', async () => {
+  it('returns a validated health response', async () => {
     const result = firstValueFrom(service.checkHealth());
 
-    const request = httpTestingController.expectOne('/api/health');
+    const request = httpController.expectOne('/api/health');
 
     expect(request.request.method).toBe('GET');
 
@@ -46,29 +43,28 @@ describe('HealthApiService', () => {
   it('rejects an invalid health response', async () => {
     const result = firstValueFrom(service.checkHealth());
 
-    const request = httpTestingController.expectOne('/api/health');
+    const request = httpController.expectOne('/api/health');
+
+    expect(request.request.method).toBe('GET');
 
     request.flush({
       status: 'unexpected',
     });
 
-    await expect(result).rejects.toThrow(
-      'Response could not be parsed.',
-    );
+    await expect(result).rejects.toThrow('Response could not be parsed.');
   });
 
-  it('maps HTTP failures to a safe error', async () => {
+  it('normalizes request failures', async () => {
     const result = firstValueFrom(service.checkHealth());
 
-    const request = httpTestingController.expectOne('/api/health');
+    const request = httpController.expectOne('/api/health');
 
-    request.flush(
-      {},
-      {
-        status: 500,
-        statusText: 'Internal Server Error',
-      },
-    );
+    expect(request.request.method).toBe('GET');
+
+    request.flush('Server error', {
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
 
     await expect(result).rejects.toThrow('Request failed.');
   });
