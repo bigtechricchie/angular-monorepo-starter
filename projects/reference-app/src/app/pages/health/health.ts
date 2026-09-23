@@ -8,7 +8,7 @@ import {
 } from './health.models';
 
 @Component({
-  selector: 'app-health',
+  selector: 'app-reference-health',
   templateUrl: './health.html',
 })
 export class Health {
