@@ -3,7 +3,7 @@
 
   <p>Check whether the API is available.</p>
 
-  @let healthCheckState = healthCheck();
+  @let healthCheckState = healthStatus();
 
   <button type="button" [disabled]="healthCheckState.state === states.loading" (click)="checkHealth()">
     Check API health

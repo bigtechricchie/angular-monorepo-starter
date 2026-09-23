@@ -17,12 +17,12 @@ export class Health {
 
   protected readonly states = healthCheckStates;
 
-  protected readonly healthCheck = signal<HealthCheckState>({
+  protected readonly healthStatus = signal<HealthCheckState>({
     state: healthCheckStates.idle,
   });
 
   protected checkHealth(): void {
-    this.healthCheck.set({
+    this.healthStatus.set({
       state: healthCheckStates.loading,
     });
 
@@ -31,13 +31,13 @@ export class Health {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          this.healthCheck.set({
+          this.healthStatus.set({
             state: healthCheckStates.success,
             status: response.status,
           });
         },
         error: (error: Error) => {
-          this.healthCheck.set({
+          this.healthStatus.set({
             state: healthCheckStates.error,
             message: error.message,
           });
