@@ -1,1 +1,13 @@
-/* You can add global styles to this file, and also import other style files */
+@import "./reset.css";
+
+/* App-specific styles for portal-app.
+
+   Host bridge: app-portal-root sits between body and .app; without this
+   it defaults to display: block and breaks the flex chain. Structural
+   properties only - never visual styling on the host. */
+
+app-portal-root {
+  flex: 1;
+  display: flex;
+  min-inline-size: 0;
+}
