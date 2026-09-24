@@ -1,31 +1,59 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { computed, Injectable, signal } from '@angular/core';
 import {
   healthEndpoint,
   InvalidHealthResponseError,
   parseHealthResponse,
   type HealthResponse,
 } from '@lib/api';
-import { catchError, map, throwError, type Observable } from 'rxjs';
 
+const invalidResponseMessage = 'Response could not be parsed.';
 const requestFailedMessage = 'Request failed.';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HealthApiService {
-  private readonly http = inject(HttpClient);
+  private readonly requestAttempt = signal(0);
 
-  checkHealth(): Observable<HealthResponse> {
-    return this.http.get<unknown>(healthEndpoint).pipe(
-      map(parseHealthResponse),
-      catchError((error: unknown) => {
-        if (error instanceof InvalidHealthResponseError) {
-          return throwError(() => error);
-        }
+  private readonly healthResource = httpResource<HealthResponse>(
+    () => {
+      const requestAttempt = this.requestAttempt();
 
-        return throwError(() => new Error(requestFailedMessage));
-      }),
+      return requestAttempt === 0
+        ? undefined
+        : healthEndpoint;
+    },
+    {
+      parse: parseHealthResponse,
+    },
+  );
+
+  readonly isLoading = this.healthResource.isLoading;
+
+  readonly response = computed(() =>
+    this.healthResource.hasValue()
+      ? this.healthResource.value()
+      : undefined,
+  );
+
+  readonly errorMessage = computed(() => {
+    const error = this.healthResource.error();
+
+    if (!error) {
+      return undefined;
+    }
+
+    if (error instanceof InvalidHealthResponseError) {
+      return invalidResponseMessage;
+    }
+
+    return requestFailedMessage;
+  });
+
+  checkHealth(): void {
+    this.requestAttempt.update(
+      (attempt) => attempt + 1,
     );
   }
 }
