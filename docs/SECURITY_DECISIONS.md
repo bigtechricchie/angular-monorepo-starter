@@ -188,17 +188,22 @@ This makes test dependencies visible in the source and avoids hidden ambient tes
 
 ## Defensive API boundaries
 
-### Network responses begin as `unknown`
+### Network responses are untrusted runtime data
 
-Angular HTTP calls do not trust backend response types simply because TypeScript generics are available.
+Angular HTTP consumers do not trust backend response types simply because TypeScript generics are available.
 
-For example, health responses are requested as:
+Shared API parsers receive transport data as `unknown` and validate it before exposing trusted application contracts.
+
+For example, the health response follows this boundary:
 
 ```text
-HttpClient.get<unknown>(...)
+HTTP response
+→ unknown
+→ runtime parser
+→ trusted HealthResponse
 ```
 
-External data remains `unknown` until runtime validation succeeds.
+A TypeScript generic can describe the expected result to the compiler, but it does not validate the actual network payload at runtime.
 
 ### Runtime response validation
 
@@ -294,7 +299,7 @@ routes
 pages
 templates
 presentation state
-Angular HttpClient orchestration
+Angular HTTP orchestration
 user-facing error behavior
 ```
 

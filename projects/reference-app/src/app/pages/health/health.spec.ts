@@ -1,6 +1,6 @@
+import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { Subject, throwError } from 'rxjs';
+import type { HealthResponse } from '@lib/api';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Health } from './health';
@@ -8,83 +8,103 @@ import { HealthApiService } from './health-api.service';
 
 describe('Health', () => {
   let fixture: ComponentFixture<Health>;
-
-  const healthApi = {
-    checkHealth: vi.fn(),
+  let healthApi: {
+    isLoading: WritableSignal<boolean>;
+    response: WritableSignal<HealthResponse | undefined>;
+    errorMessage: WritableSignal<string | undefined>;
+    checkHealth: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
-    healthApi.checkHealth.mockReset();
+    healthApi = {
+      isLoading: signal(false),
+      response: signal<HealthResponse | undefined>(undefined),
+      errorMessage: signal<string | undefined>(undefined),
+      checkHealth: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [Health],
-      providers: [
-        {
-          provide: HealthApiService,
-          useValue: healthApi,
-        },
-      ],
+      providers: [{ provide: HealthApiService, useValue: healthApi }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Health);
     fixture.detectChanges();
   });
 
-  it('starts idle', () => {
-    const heading = fixture.debugElement.query(By.css('h2'));
+  function query<T extends Element>(selector: string): T | null {
+    return fixture.nativeElement.querySelector(selector);
+  }
 
-    expect(heading.nativeElement.textContent).toContain('Health check');
-    expect(fixture.nativeElement.textContent).not.toContain('Checking API health');
+  it('renders the page heading', () => {
+    expect(query('h2')?.textContent).toContain('Health');
   });
 
-  it('shows loading while the request is pending', () => {
-    const response$ = new Subject<{ status: 'ok' }>();
+  it('shows no status or alert before a check', () => {
+    expect(query('[role="status"]')).toBeNull();
+    expect(query('[role="alert"]')).toBeNull();
+    expect(query('strong')).toBeNull();
+  });
 
-    healthApi.checkHealth.mockReturnValue(response$);
+  it('checks API health when requested', () => {
+    query<HTMLButtonElement>('button')?.click();
 
-    const button = fixture.debugElement.query(By.css('button'));
+    expect(healthApi.checkHealth).toHaveBeenCalledOnce();
+  });
 
-    button.nativeElement.click();
+  it('shows loading state and disables the button', () => {
+    healthApi.isLoading.set(true);
     fixture.detectChanges();
 
-    expect(button.nativeElement.disabled).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain('Checking API health');
+    expect(query<HTMLButtonElement>('button')?.disabled).toBe(true);
+    expect(query('[role="status"]')?.textContent).toContain(
+      'Checking API health...',
+    );
   });
 
-  it('shows the API status after success', () => {
-    const response$ = new Subject<{ status: 'ok' }>();
+  it('shows an error message', () => {
+    healthApi.errorMessage.set('Request failed.');
+    fixture.detectChanges();
 
-    healthApi.checkHealth.mockReturnValue(response$);
+    expect(query('[role="alert"]')?.textContent).toContain(
+      'Request failed.',
+    );
+  });
 
-    const button = fixture.debugElement.query(By.css('button'));
-
-    button.nativeElement.click();
-
-    response$.next({
+  it('shows a successful health response', () => {
+    healthApi.response.set({
       status: 'ok',
     });
-
     fixture.detectChanges();
 
-    const status = fixture.debugElement.query(By.css('strong'));
-
-    expect(status.nativeElement.textContent).toContain('ok');
+    expect(query('[role="status"]')?.textContent).toContain('API status:');
+    expect(query('strong')?.textContent?.trim()).toBe('ok');
   });
 
-  it('shows the normalized error message as an alert', () => {
-    healthApi.checkHealth.mockReturnValue(
-      throwError(() => new Error('Request failed.')),
-    );
-
-    const button = fixture.debugElement.query(By.css('button'));
-
-    button.nativeElement.click();
+  it('prefers the loading state over an error or previous response', () => {
+    healthApi.isLoading.set(true);
+    healthApi.errorMessage.set('Request failed.');
+    healthApi.response.set({
+      status: 'ok',
+    });
     fixture.detectChanges();
 
-    const alert = fixture.debugElement.query(By.css('[role="alert"]'));
-
-    expect(alert.nativeElement.textContent).toContain(
-      'Health check failed: Request failed.',
+    expect(query('[role="status"]')?.textContent).toContain(
+      'Checking API health...',
     );
+    expect(query('[role="alert"]')).toBeNull();
+    expect(query('strong')).toBeNull();
+  });
+
+  it('prefers the error over a previous response', () => {
+    healthApi.errorMessage.set('Request failed.');
+    healthApi.response.set({
+      status: 'ok',
+    });
+    fixture.detectChanges();
+
+    expect(query('[role="alert"]')).not.toBeNull();
+    expect(query('[role="status"]')).toBeNull();
+    expect(query('strong')).toBeNull();
   });
 });

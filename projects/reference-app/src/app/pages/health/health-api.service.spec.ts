@@ -1,15 +1,24 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+  type TestRequest,
+} from '@angular/common/http/testing';
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { InvalidHealthResponseError } from '@lib/api';
-import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { HealthApiService } from './health-api.service';
 
+type FlushBody = Parameters<TestRequest['flush']>[0];
+
+const validHealthResponse = {
+  status: 'ok',
+} as const;
+
 describe('HealthApiService', () => {
   let service: HealthApiService;
   let httpController: HttpTestingController;
+  let applicationRef: ApplicationRef;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -18,80 +27,118 @@ describe('HealthApiService', () => {
 
     service = TestBed.inject(HealthApiService);
     httpController = TestBed.inject(HttpTestingController);
+    applicationRef = TestBed.inject(ApplicationRef);
   });
 
   afterEach(() => {
     httpController.verify();
   });
 
-  function startRequest() {
-    const result = firstValueFrom(service.checkHealth());
+  function startCheck(): TestRequest {
+    service.checkHealth();
+    TestBed.tick();
+
     const request = httpController.expectOne('/api/health');
 
     expect(request.request.method).toBe('GET');
 
-    return { request, result };
+    return request;
   }
 
-  async function rejectionOf(result: Promise<unknown>): Promise<unknown> {
-    return result.catch((error: unknown) => error);
+  async function completeCheck(body: FlushBody): Promise<void> {
+    startCheck().flush(body);
+
+    await applicationRef.whenStable();
   }
 
-  it('returns the parsed response rather than the raw body', async () => {
-    const { request, result } = startRequest();
-
-    request.flush({
-      status: 'ok',
-      unexpected: 'value',
-    });
-
-    await expect(result).resolves.toStrictEqual({
-      status: 'ok',
-    });
-  });
-
-  it('preserves invalid-response errors', async () => {
-    const { request, result } = startRequest();
-
-    request.flush({
-      status: 'unexpected',
-    });
-
-    const error = await rejectionOf(result);
-
-    expect(error).toBeInstanceOf(InvalidHealthResponseError);
-    expect(error).toHaveProperty(
-      'message',
-      'Response could not be parsed.',
-    );
-  });
-
-  it('normalizes HTTP failures', async () => {
-    const { request, result } = startRequest();
-
-    request.flush('internal detail: db password', {
+  async function failCheckWithHttpError(): Promise<void> {
+    startCheck().flush('internal detail: db password', {
       status: 500,
       statusText: 'Internal Server Error',
     });
 
-    const error = await rejectionOf(result);
+    await applicationRef.whenStable();
+  }
 
-    expect(error).toBeInstanceOf(Error);
-    expect(error).not.toBeInstanceOf(HttpErrorResponse);
-    expect(error).not.toBeInstanceOf(InvalidHealthResponseError);
-    expect(error).toHaveProperty('message', 'Request failed.');
-    expect(String(error)).not.toContain('db password');
+  it('does not request health before explicitly checked', () => {
+    TestBed.tick();
+
+    httpController.expectNone('/api/health');
+
+    expect(service.isLoading()).toBe(false);
+    expect(service.response()).toBeUndefined();
+    expect(service.errorMessage()).toBeUndefined();
+  });
+
+  it('reports loading while the request is in flight', async () => {
+    const request = startCheck();
+
+    expect(service.isLoading()).toBe(true);
+
+    request.flush(validHealthResponse);
+    await applicationRef.whenStable();
+
+    expect(service.isLoading()).toBe(false);
+  });
+
+  it('returns the parsed response rather than the raw body', async () => {
+    await completeCheck({
+      ...validHealthResponse,
+      unexpected: 'value',
+    });
+
+    expect(service.response()).toStrictEqual(validHealthResponse);
+    expect(service.errorMessage()).toBeUndefined();
+  });
+
+  it('reports invalid responses without exposing the body', async () => {
+    const untrusted = 'secret-token-value';
+
+    await completeCheck({
+      status: untrusted,
+    });
+
+    expect(service.response()).toBeUndefined();
+    expect(service.errorMessage()).toBe('Response could not be parsed.');
+    expect(service.errorMessage()).not.toContain(untrusted);
+  });
+
+  it('normalizes HTTP failures without exposing details', async () => {
+    await failCheckWithHttpError();
+
+    expect(service.response()).toBeUndefined();
+    expect(service.errorMessage()).toBe('Request failed.');
+    expect(service.errorMessage()).not.toContain('db password');
   });
 
   it('normalizes network failures', async () => {
-    const { request, result } = startRequest();
+    startCheck().error(new ProgressEvent('error'));
 
-    request.error(new ProgressEvent('error'));
+    await applicationRef.whenStable();
 
-    const error = await rejectionOf(result);
+    expect(service.response()).toBeUndefined();
+    expect(service.errorMessage()).toBe('Request failed.');
+  });
 
-    expect(error).toBeInstanceOf(Error);
-    expect(error).not.toBeInstanceOf(HttpErrorResponse);
-    expect(error).toHaveProperty('message', 'Request failed.');
+  it('does not keep a stale response after a failed re-check', async () => {
+    await completeCheck(validHealthResponse);
+
+    expect(service.response()).toStrictEqual(validHealthResponse);
+
+    await failCheckWithHttpError();
+
+    expect(service.response()).toBeUndefined();
+    expect(service.errorMessage()).toBe('Request failed.');
+  });
+
+  it('clears a previous error after a successful re-check', async () => {
+    await failCheckWithHttpError();
+
+    expect(service.errorMessage()).toBe('Request failed.');
+
+    await completeCheck(validHealthResponse);
+
+    expect(service.errorMessage()).toBeUndefined();
+    expect(service.response()).toStrictEqual(validHealthResponse);
   });
 });
