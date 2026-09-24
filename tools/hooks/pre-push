@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-pnpm audit --audit-level=high
+# Git sends pushed refs on stdin. Prevent child processes from consuming them.
+pnpm audit --audit-level=high < /dev/null
 
 run_reference=false
 run_portal=false
 run_all=false
+run_libs=false
 
-while read -r local_ref local_sha remote_ref remote_sha; do
+while read -r _ local_sha _ remote_sha; do
   # Branch/tag deletion: there is no local commit to test.
   if [[ "$local_sha" =~ ^0+$ ]]; then
     continue
@@ -16,31 +18,80 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   # New remote ref: there is no previous remote SHA to diff against safely.
   if [[ "$remote_sha" =~ ^0+$ ]]; then
     run_all=true
+    run_libs=true
     continue
   fi
 
-  changed_files=$(git diff --name-only "$remote_sha..$local_sha")
+  # If the remote SHA is unavailable locally, fail closed by running everything.
+  if ! changed_files=$(
+    git diff \
+      --name-only \
+      "$remote_sha..$local_sha" \
+      2>/dev/null
+  ); then
+    echo \
+      "pre-push: cannot diff against remote ref; running the full gate." \
+      >&2
 
-  if grep -qE '^(angular\.json|package\.json|pnpm-lock\.yaml|tsconfig\.json)$' <<< "$changed_files"; then
+    run_all=true
+    run_libs=true
+    continue
+  fi
+
+  # Shared dependency/compiler configuration can affect libraries and apps.
+  if grep -qE \
+    '^(package\.json|pnpm-lock\.yaml|tsconfig\.json)$' \
+    <<< "$changed_files"
+  then
+    run_all=true
+    run_libs=true
+  fi
+
+  # Angular workspace configuration affects Angular applications.
+  if grep -q \
+    '^angular\.json$' \
+    <<< "$changed_files"
+  then
     run_all=true
   fi
 
-  if grep -q '^tools/' <<< "$changed_files"; then
+  # Hook/tooling changes should exercise the complete push gate.
+  if grep -q \
+    '^tools/' \
+    <<< "$changed_files"
+  then
     run_all=true
+    run_libs=true
   fi
 
-  if grep -q '^libs/' <<< "$changed_files"; then
+  # Shared libraries affect themselves and both Angular consumers.
+  if grep -q \
+    '^libs/' \
+    <<< "$changed_files"
+  then
     run_all=true
+    run_libs=true
   fi
 
-  if grep -q '^projects/reference-app/' <<< "$changed_files"; then
+  if grep -q \
+    '^projects/reference-app/' \
+    <<< "$changed_files"
+  then
     run_reference=true
   fi
 
-  if grep -q '^projects/portal-app/' <<< "$changed_files"; then
+  if grep -q \
+    '^projects/portal-app/' \
+    <<< "$changed_files"
+  then
     run_portal=true
   fi
 done
+
+if [ "$run_libs" = true ]; then
+  pnpm run typecheck:libs
+  pnpm run test:libs
+fi
 
 if [ "$run_all" = true ]; then
   pnpm exec ng test reference-app --watch=false

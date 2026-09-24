@@ -1,8 +1,7 @@
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpErrorResponse } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { InvalidHealthResponseError } from '@lib/api';
 import { firstValueFrom } from 'rxjs';
 
 import { HealthApiService } from './health-api.service';
@@ -24,48 +23,74 @@ describe('HealthApiService', () => {
     httpController.verify();
   });
 
-  it('returns a validated health response', async () => {
+  function startRequest() {
     const result = firstValueFrom(service.checkHealth());
-
     const request = httpController.expectOne('/api/health');
 
     expect(request.request.method).toBe('GET');
 
+    return { request, result };
+  }
+
+  async function rejectionOf(result: Promise<unknown>): Promise<unknown> {
+    return result.catch((error: unknown) => error);
+  }
+
+  it('returns the parsed response rather than the raw body', async () => {
+    const { request, result } = startRequest();
+
     request.flush({
       status: 'ok',
+      unexpected: 'value',
     });
 
-    await expect(result).resolves.toEqual({
+    await expect(result).resolves.toStrictEqual({
       status: 'ok',
     });
   });
 
-  it('rejects an invalid health response', async () => {
-    const result = firstValueFrom(service.checkHealth());
-
-    const request = httpController.expectOne('/api/health');
-
-    expect(request.request.method).toBe('GET');
+  it('preserves invalid-response errors', async () => {
+    const { request, result } = startRequest();
 
     request.flush({
       status: 'unexpected',
     });
 
-    await expect(result).rejects.toThrow('Response could not be parsed.');
+    const error = await rejectionOf(result);
+
+    expect(error).toBeInstanceOf(InvalidHealthResponseError);
+    expect(error).toHaveProperty(
+      'message',
+      'Response could not be parsed.',
+    );
   });
 
-  it('normalizes request failures', async () => {
-    const result = firstValueFrom(service.checkHealth());
+  it('normalizes HTTP failures', async () => {
+    const { request, result } = startRequest();
 
-    const request = httpController.expectOne('/api/health');
-
-    expect(request.request.method).toBe('GET');
-
-    request.flush('Server error', {
+    request.flush('internal detail: db password', {
       status: 500,
       statusText: 'Internal Server Error',
     });
 
-    await expect(result).rejects.toThrow('Request failed.');
+    const error = await rejectionOf(result);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(HttpErrorResponse);
+    expect(error).not.toBeInstanceOf(InvalidHealthResponseError);
+    expect(error).toHaveProperty('message', 'Request failed.');
+    expect(String(error)).not.toContain('db password');
+  });
+
+  it('normalizes network failures', async () => {
+    const { request, result } = startRequest();
+
+    request.error(new ProgressEvent('error'));
+
+    const error = await rejectionOf(result);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(HttpErrorResponse);
+    expect(error).toHaveProperty('message', 'Request failed.');
   });
 });

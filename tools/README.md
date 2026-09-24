@@ -12,11 +12,11 @@ tools/
 
 Three plain shell scripts, run natively by Git - no Husky and no runtime dependency:
 
-| Hook         | What it does                                                                          |
-| ------------ | ------------------------------------------------------------------------------------- |
-| `pre-commit` | Scans staged changes for common secret patterns                                       |
-| `commit-msg` | Enforces Conventional Commits message format                                          |
-| `pre-push`   | Runs a dependency security audit and affected Angular tests before the push completes |
+| Hook         | What it does                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| `pre-commit` | Scans staged changes for common secret patterns                                            |
+| `commit-msg` | Enforces Conventional Commits message format                                               |
+| `pre-push`   | Runs dependency auditing and affected library/application checks before the push completes |
 
 Hooks aren't active until installed. See `tools/scripts/setup-hooks.sh`.
 
@@ -26,7 +26,7 @@ Hooks aren't active until installed. See `tools/scripts/setup-hooks.sh`.
 | ---------------- | ----------------------------------------------------------------------------- |
 | `setup-hooks.sh` | Copies the tracked hooks into Git's hooks directory and makes them executable |
 
-Run once after cloning:
+Run after cloning and whenever a tracked hook changes:
 
 ```bash
 bash tools/scripts/setup-hooks.sh
@@ -42,32 +42,59 @@ pnpm audit --audit-level=high
 
 before changes leave the local repository.
 
-It also detects which Angular applications are affected by the commits being pushed and runs the relevant test suites.
-
-For example:
+It then determines which additional checks are required from the files being pushed.
 
 ```text
-projects/reference-app/
+libs/**
+→ shared library type-check
+→ shared library tests
 → reference-app tests
-
-projects/portal-app/
 → portal-app tests
 
-shared workspace configuration or libs/
-→ both test suites
+projects/reference-app/**
+→ reference-app tests
+
+projects/portal-app/**
+→ portal-app tests
+
+package.json
+pnpm-lock.yaml
+tsconfig.json
+→ shared library type-check
+→ shared library tests
+→ both Angular application test suites
+
+angular.json
+→ both Angular application test suites
+
+tools/**
+→ shared library type-check
+→ shared library tests
+→ both Angular application test suites
 
 documentation-only changes
-→ no Angular tests
+→ dependency audit only
 ```
 
-A newly pushed remote branch falls back to running both Angular test suites because there is no previous remote commit to compare safely.
+A newly pushed remote ref runs the shared library checks and both Angular application test suites because there is no previous remote commit to compare safely.
 
-These checks intentionally run later than pre-commit. Dependency auditing may require registry access, and application test suites are more expensive than staged-file checks.
+If the previous remote commit cannot be resolved locally, the hook falls back to the full gate rather than skipping affected checks.
+
+The shared library checks are:
+
+```text
+pnpm run typecheck:libs
+pnpm run test:libs
+```
+
+These checks intentionally run later than pre-commit. Dependency auditing may require registry access, and library/application test suites are more expensive than staged-file checks.
 
 The gate is designed to catch:
 
 ```text
 known high or critical dependency vulnerabilities
+type errors in shared TypeScript libraries
+failing shared library tests
 failing tests in affected Angular applications
 ```
 
@@ -75,7 +102,23 @@ before code is pushed.
 
 The audit is defense in depth, not a complete supply-chain guarantee. A clean audit means no matching known advisories were reported at that time; it does not prove that every dependency is safe.
 
-Similarly, passing affected tests verifies the applications exercised by the push, but does not replace broader CI validation.
+Similarly, passing the selected checks verifies the code paths exercised by the push, but does not replace broader CI validation.
+
+## Verifying the installed hooks
+
+After installing or updating the hooks, confirm that the installed pre-push hook matches the tracked version:
+
+```bash
+cmp tools/hooks/pre-push "$(git rev-parse --git-path hooks)/pre-push"
+```
+
+No output means the files match.
+
+You can also confirm that the installed hook is executable:
+
+```bash
+ls -l "$(git rev-parse --git-path hooks)/pre-push"
+```
 
 ## Why this folder exists
 

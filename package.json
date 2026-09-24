@@ -9,6 +9,8 @@
     "pnpm": "12.3.4"
   },
   "scripts": {
+    "test:libs": "vitest run --config libs/vitest.config.ts",
+    "typecheck:libs": "tsc --project libs/tsconfig.json",
     "dev:reference-app": "ng serve reference-app",
     "build:reference-app": "ng build reference-app",
     "test:reference-app": "ng test reference-app",

@@ -20,14 +20,14 @@ Backend services are independently executable and do not need to mirror frontend
 
 ## Engineering principles
 
-- Keep dependencies minimal and justify every addition.
-- Introduce abstractions only after a real need is proven.
-- Keep commits small, atomic, and reviewable.
-- Prefer explicit ownership, clear boundaries, and descriptive names.
-- Treat security and simplicity as complementary engineering goals.
-- Inspect generated framework output before adopting or modifying it.
-- Keep generated artifacts out of source control.
-- Pin tool and direct dependency versions exactly.
+* Keep dependencies minimal and justify every addition.
+* Introduce abstractions only after a real need is proven.
+* Keep commits small, atomic, and reviewable.
+* Prefer explicit ownership, clear boundaries, and descriptive names.
+* Treat security and simplicity as complementary engineering goals.
+* Inspect generated framework output before adopting or modifying it.
+* Keep generated artifacts out of source control.
+* Pin tool and direct dependency versions exactly.
 
 The repository is constructed incrementally, one coherent commit at a time, so its Git history explains how the architecture evolves and why each piece exists.
 
@@ -38,20 +38,27 @@ projects/
 ├── reference-app/    Permanent executable architecture guide and UI styleguide
 └── portal-app/       User-facing portal application
 
+libs/
+└── api/              Shared framework-neutral frontend API contracts and parsers
+
 services/
 └── api/              Generic Go HTTP API
 
-tools/                 Repository tooling and Git hooks
+tools/                Repository tooling and Git hooks
 ```
 
 Additional applications, libraries, and services are introduced only when a concrete requirement justifies them.
 
+`libs/api` contains framework-neutral TypeScript contracts, endpoint definitions, and runtime parsers used by frontend applications.
+
+`services/api` is the independently executable Go HTTP API.
+
 Repository-specific documentation:
 
-- [`projects/reference-app/README.md`](projects/reference-app/README.md) - reference application purpose, architectural boundaries, and development.
-- [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal application development, testing, routes, and API integration.
-- [`services/api/README.md`](services/api/README.md) - API setup, health endpoint, tests, and development checks.
-- [`tools/README.md`](tools/README.md) - repository tooling, native Git hooks, and hook installation.
+* [`projects/reference-app/README.md`](projects/reference-app/README.md) - reference application purpose, architectural boundaries, and development.
+* [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal application development, testing, routes, and API integration.
+* [`services/api/README.md`](services/api/README.md) - API setup, health endpoint, tests, and development checks.
+* [`tools/README.md`](tools/README.md) - repository tooling, native Git hooks, and hook installation.
 
 ## Applications
 
@@ -103,6 +110,18 @@ Build the Portal application:
 
 ```text
 pnpm run build:portal-app
+```
+
+Type-check the shared libraries:
+
+```text
+pnpm run typecheck:libs
+```
+
+Run the shared library tests:
+
+```text
+pnpm run test:libs
 ```
 
 Run the reference application tests:
