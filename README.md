@@ -1,6 +1,6 @@
 # Angular Monorepo Starter
 
-A security-conscious Angular and Go monorepo starter designed for fast prototyping and clear application boundaries.
+A security-focused Angular and Go monorepo starter designed for fast prototyping and clear application boundaries.
 
 The project is built incrementally, with small architectural decisions that keep the starter easy to understand, adapt, and extend.
 
@@ -59,6 +59,7 @@ Repository-specific documentation:
 * [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal application development, testing, routes, and API integration.
 * [`services/api/README.md`](services/api/README.md) - API setup, health endpoint, tests, and development checks.
 * [`tools/README.md`](tools/README.md) - repository tooling, native Git hooks, and hook installation.
+* [`docs/SECURITY-DECISIONS.md`](docs/SECURITY-DECISIONS.md) - security-oriented design decisions, trust boundaries, and deliberate tooling choices.
 
 ## Applications
 
