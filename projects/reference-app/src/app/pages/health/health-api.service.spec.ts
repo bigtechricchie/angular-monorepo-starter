@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { InvalidHealthResponseError } from '@lib/api';
 import { firstValueFrom } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { HealthApiService } from './health-api.service';
 
