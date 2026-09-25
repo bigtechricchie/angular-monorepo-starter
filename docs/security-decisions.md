@@ -25,6 +25,8 @@ Direct dependencies and core tooling are pinned to exact versions rather than ve
 
 This avoids silently accepting a different version during a future install merely because it satisfies `^` or `~` semantics.
 
+The committed lockfile is installed with `--frozen-lockfile`, so an install cannot silently resolve a different dependency tree than the one reviewed and committed.
+
 ### pnpm engine enforcement
 
 The workspace declares the expected Node and pnpm versions and enables strict engine handling.
@@ -58,6 +60,8 @@ pnpm audit --audit-level=high
 The push fails when matching known high or critical dependency advisories are reported.
 
 A clean audit does not prove that dependencies are safe. It means no matching known advisories were reported by the audit source at that time.
+
+See [`solving-dependency-vulnerabilities.md`](./solving-dependency-vulnerabilities.md) for the investigation and remediation workflow when the audit blocks a push.
 
 ## Minimal tooling surface
 
@@ -138,7 +142,23 @@ It does not silently skip testing when the affected scope is uncertain.
 
 Git supplies pushed references through standard input.
 
-Commands that run before the hook processes those references do not receive that input, preventing another process from accidentally consuming the data needed by the hook.
+The dependency audit runs before the hook reads those references and is started with standard input redirected away from it:
+
+```text
+pnpm audit --audit-level=high < /dev/null
+```
+
+This prevents the audit process from accidentally consuming the reference data that the hook needs for affected-change detection.
+
+### Local hook limitation
+
+Repository Git hooks are local developer controls.
+
+They must be installed by the repository setup script before Git will run them, and Git allows a developer to bypass hooks explicitly with options such as `--no-verify`.
+
+The hooks therefore provide an early local security and quality gate, not an enforcement boundary against a malicious developer.
+
+Critical repository protections should also exist in trusted CI or repository policy when the project reaches that deployment stage.
 
 ## TypeScript safety
 
@@ -176,7 +196,7 @@ This prevents browser DOM globals from becoming accidental dependencies of frame
 
 ### Explicit test imports
 
-Vitest APIs are imported explicitly rather than relying on globally injected test functions.
+The repository convention is to import Vitest APIs explicitly rather than relying on globally injected test functions.
 
 For example:
 
@@ -184,7 +204,7 @@ For example:
 import { describe, expect, it } from 'vitest';
 ```
 
-This makes test dependencies visible in the source and avoids hidden ambient test APIs.
+This keeps test dependencies visible in source files and avoids unnecessary reliance on ambient test APIs.
 
 ## Defensive API boundaries
 

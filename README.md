@@ -59,7 +59,8 @@ Repository-specific documentation:
 * [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal application development, testing, routes, and API integration.
 * [`services/api/README.md`](services/api/README.md) - API setup, health endpoint, tests, and development checks.
 * [`tools/README.md`](tools/README.md) - repository tooling, native Git hooks, and hook installation.
-* [`docs/SECURITY-DECISIONS.md`](docs/SECURITY-DECISIONS.md) - security-oriented design decisions, trust boundaries, and deliberate tooling choices.
+* [`docs/security-decisions.md`](docs/security-decisions.md) - security-oriented design decisions, trust boundaries, and deliberate tooling choices.
+* [`docs/solving-dependency-vulnerabilities.md`](docs/solving-dependency-vulnerabilities.md) - investigation and remediation workflow for dependency security advisories.
 
 ## Applications
 
