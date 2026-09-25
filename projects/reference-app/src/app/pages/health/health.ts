@@ -5,6 +5,7 @@ import { HealthApiService } from './health-api.service';
 @Component({
   selector: 'app-reference-health',
   templateUrl: './health.html',
+  providers: [HealthApiService]
 })
 export class Health {
   private readonly healthApi = inject(HealthApiService);

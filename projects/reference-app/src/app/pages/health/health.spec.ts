@@ -25,8 +25,13 @@ describe('Health', () => {
 
     await TestBed.configureTestingModule({
       imports: [Health],
-      providers: [{ provide: HealthApiService, useValue: healthApi }],
-    }).compileComponents();
+    })
+      .overrideComponent(Health, {
+        set: {
+          providers: [{ provide: HealthApiService, useValue: healthApi }],
+        },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(Health);
     fixture.detectChanges();

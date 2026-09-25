@@ -10,9 +10,7 @@ import {
 const invalidResponseMessage = 'Response could not be parsed.';
 const requestFailedMessage = 'Request failed.';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class HealthApiService {
   private readonly requestAttempt = signal(0);
 

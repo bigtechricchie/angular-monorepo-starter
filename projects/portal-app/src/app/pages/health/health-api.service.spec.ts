@@ -22,7 +22,7 @@ describe('HealthApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClientTesting()],
+      providers: [HealthApiService, provideHttpClientTesting()],
     });
 
     service = TestBed.inject(HealthApiService);
