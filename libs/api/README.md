@@ -89,7 +89,13 @@ The library must not depend on Angular or application code.
 Tests run through the plain library Vitest configuration in a Node
 environment.
 
-Run:
+Run API library tests:
+
+```text
+pnpm run test:api-lib
+```
+
+Run all library tests:
 
 ```text
 pnpm run test:libs

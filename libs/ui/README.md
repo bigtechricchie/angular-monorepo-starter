@@ -40,7 +40,6 @@ It receives:
 isLoading
 status
 errorMessage
-description
 actionLabel
 loadingLabel
 statusLabel
@@ -54,8 +53,8 @@ checkRequested
 
 The component does not know how the health request is performed.
 
-The application owns `HealthApiService`, `httpResource()`, API parsing, and
-request lifecycle.
+The application owns `HealthApiService`, `httpResource()`, API parsing,
+request lifecycle, explanatory copy, and page composition.
 
 The routed page also keeps ownership of its page heading and surrounding
 composition.
@@ -90,6 +89,12 @@ This is a tooling dependency only. `@lib/ui` does not import from
 
 If `reference-app` is renamed or removed, update the `ui-lib` `buildTarget`
 in `angular.json`.
+
+Run all library tests from the repository root with:
+
+```text
+pnpm run test:libs
+```
 
 Vitest APIs are imported explicitly.
 

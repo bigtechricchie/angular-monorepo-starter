@@ -7,7 +7,9 @@ pnpm audit --audit-level=high < /dev/null
 run_reference=false
 run_portal=false
 run_all=false
-run_libs=false
+run_all_libs=false
+run_api_lib=false
+run_ui_lib=false
 
 while read -r _ local_sha _ remote_sha; do
   # Branch/tag deletion: there is no local commit to test.
@@ -18,7 +20,7 @@ while read -r _ local_sha _ remote_sha; do
   # New remote ref: there is no previous remote SHA to diff against safely.
   if [[ "$remote_sha" =~ ^0+$ ]]; then
     run_all=true
-    run_libs=true
+    run_all_libs=true
     continue
   fi
 
@@ -34,7 +36,7 @@ while read -r _ local_sha _ remote_sha; do
       >&2
 
     run_all=true
-    run_libs=true
+    run_all_libs=true
     continue
   fi
 
@@ -44,15 +46,16 @@ while read -r _ local_sha _ remote_sha; do
     <<< "$changed_files"
   then
     run_all=true
-    run_libs=true
+    run_all_libs=true
   fi
 
-  # Angular workspace configuration affects Angular applications.
+  # Angular workspace configuration can affect apps and Angular library tests.
   if grep -q \
     '^angular\.json$' \
     <<< "$changed_files"
   then
     run_all=true
+    run_ui_lib=true
   fi
 
   # Hook/tooling changes should exercise the complete push gate.
@@ -61,16 +64,34 @@ while read -r _ local_sha _ remote_sha; do
     <<< "$changed_files"
   then
     run_all=true
-    run_libs=true
+    run_all_libs=true
   fi
 
-  # Shared libraries affect themselves and both Angular consumers.
-  if grep -q \
-    '^libs/' \
+  # Shared library configuration can affect every library.
+  if grep -qE \
+    '^libs/(tsconfig\.json|vitest\.config\.ts)$' \
     <<< "$changed_files"
   then
     run_all=true
-    run_libs=true
+    run_all_libs=true
+  fi
+
+  # API library changes affect the library and both consumers.
+  if grep -q \
+    '^libs/api/' \
+    <<< "$changed_files"
+  then
+    run_all=true
+    run_api_lib=true
+  fi
+
+  # UI library changes affect the library and both consumers.
+  if grep -q \
+    '^libs/ui/' \
+    <<< "$changed_files"
+  then
+    run_all=true
+    run_ui_lib=true
   fi
 
   if grep -q \
@@ -88,9 +109,21 @@ while read -r _ local_sha _ remote_sha; do
   fi
 done
 
-if [ "$run_libs" = true ]; then
+if [ "$run_all_libs" = true ]; then
   pnpm run typecheck:libs
   pnpm run test:libs
+else
+  if [ "$run_api_lib" = true ] || [ "$run_ui_lib" = true ]; then
+    pnpm run typecheck:libs
+  fi
+
+  if [ "$run_api_lib" = true ]; then
+    pnpm run test:api-lib
+  fi
+
+  if [ "$run_ui_lib" = true ]; then
+    pnpm run test:ui-lib --watch=false
+  fi
 fi
 
 if [ "$run_all" = true ]; then

@@ -87,6 +87,26 @@ libs/ui
 → browser presentation is intentional
 ```
 
+## Testing
+
+Run API library tests:
+
+```text
+pnpm run test:api-lib
+```
+
+Run Angular UI library tests:
+
+```text
+pnpm run test:ui-lib --watch=false
+```
+
+Run all library tests:
+
+```text
+pnpm run test:libs
+```
+
 ## Public APIs
 
 Applications should import libraries through their public aliases:

@@ -13,8 +13,9 @@
     "dev:portal-app": "ng serve portal-app",
     "test:reference-app": "ng test reference-app",
     "test:portal-app": "ng test portal-app",
+    "test:api-lib": "vitest run --config libs/vitest.config.ts",
     "test:ui-lib": "ng test ui-lib",
-    "test:libs": "vitest run --config libs/vitest.config.ts",
+    "test:libs": "pnpm run test:api-lib && pnpm run test:ui-lib --watch=false",
     "typecheck:libs": "tsc --project libs/api/tsconfig.json && tsc --project libs/ui/tsconfig.json"
   },
   "dependencies": {
