@@ -124,6 +124,20 @@
           "builder": "@angular/build:unit-test"
         }
       }
+    },
+    "ui-lib": {
+      "projectType": "library",
+      "root": "libs/ui",
+      "sourceRoot": "libs/ui/src",
+      "architect": {
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "reference-app:build:development",
+            "tsConfig": "libs/ui/tsconfig.spec.json"
+          }
+        }
+      }
     }
   }
 }

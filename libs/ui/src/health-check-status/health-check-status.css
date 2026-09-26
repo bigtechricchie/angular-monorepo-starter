@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.health-check-status {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.health-check-status p {
+  margin: 0;
+}
+
+.health-check-status__message {
+  min-block-size: 1.5em;
+}

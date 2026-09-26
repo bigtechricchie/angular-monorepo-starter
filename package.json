@@ -9,14 +9,13 @@
     "pnpm": "12.3.4"
   },
   "scripts": {
-    "test:libs": "vitest run --config libs/vitest.config.ts",
-    "typecheck:libs": "tsc --project libs/tsconfig.json",
     "dev:reference-app": "ng serve reference-app",
-    "build:reference-app": "ng build reference-app",
-    "test:reference-app": "ng test reference-app",
     "dev:portal-app": "ng serve portal-app",
-    "build:portal-app": "ng build portal-app",
-    "test:portal-app": "ng test portal-app"
+    "test:reference-app": "ng test reference-app",
+    "test:portal-app": "ng test portal-app",
+    "test:ui-lib": "ng test ui-lib",
+    "test:libs": "vitest run --config libs/vitest.config.ts",
+    "typecheck:libs": "tsc --project libs/api/tsconfig.json && tsc --project libs/ui/tsconfig.json"
   },
   "dependencies": {
     "@angular/common": "22.1.7",

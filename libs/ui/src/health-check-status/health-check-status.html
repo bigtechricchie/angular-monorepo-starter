@@ -1,0 +1,22 @@
+<div class="health-check-status">
+  <p>{{ description() }}</p>
+
+  <button type="button" [disabled]="isLoading()" (click)="checkRequested.emit()">
+    {{ actionLabel() }}
+  </button>
+
+  @if (isLoading()) {
+  <p class="health-check-status__message" role="status">
+    {{ loadingLabel() }}
+  </p>
+  } @else if (errorMessage(); as message) {
+  <p class="health-check-status__message" role="alert">
+    {{ message }}
+  </p>
+  } @else if (status(); as value) {
+  <p class="health-check-status__message" role="status">
+    {{ statusLabel() }}
+    <strong>{{ value }}</strong>
+  </p>
+  }
+</div>
