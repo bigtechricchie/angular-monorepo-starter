@@ -1,11 +1,13 @@
 import { Component, inject } from '@angular/core';
+import { HealthCheckStatus } from '@lib/ui';
 
 import { HealthApiService } from './health-api.service';
 
 @Component({
   selector: 'app-portal-health',
+  imports: [HealthCheckStatus],
   templateUrl: './health.html',
-  providers: [HealthApiService]
+  providers: [HealthApiService],
 })
 export class Health {
   private readonly healthApi = inject(HealthApiService);

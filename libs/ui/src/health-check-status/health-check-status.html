@@ -1,9 +1,5 @@
 <div class="health-check-status">
-  <p>{{ description() }}</p>
-
-  <button type="button" [disabled]="isLoading()" (click)="checkRequested.emit()">
-    {{ actionLabel() }}
-  </button>
+  <button type="button" [disabled]="isLoading()" (click)="requestCheck()">{{ actionLabel() }}</button>
 
   @if (isLoading()) {
   <p class="health-check-status__message" role="status">

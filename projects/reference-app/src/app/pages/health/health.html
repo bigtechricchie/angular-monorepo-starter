@@ -3,22 +3,7 @@
 
   <p>Check whether the API is available.</p>
 
-  <button type="button" [disabled]="isLoading()" (click)="checkHealth()">
-    Check API health
-  </button>
-
-  @if (isLoading()) {
-  <p role="status">
-    Checking API health...
-  </p>
-  } @else if (errorMessage(); as message) {
-  <p role="alert">
-    {{ message }}
-  </p>
-  } @else if (response(); as health) {
-  <p role="status">
-    API status:
-    <strong>{{ health.status }}</strong>
-  </p>
-  }
+  <app-health-check-status [isLoading]="isLoading()" [status]="response()?.status" [errorMessage]="errorMessage()"
+    description="Check whether the API is available." actionLabel="Check API health" loadingLabel="Checking API health…"
+    statusLabel="API status:" (checkRequested)="checkHealth()" />
 </section>

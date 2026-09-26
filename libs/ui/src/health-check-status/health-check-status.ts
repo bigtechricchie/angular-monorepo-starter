@@ -10,10 +10,13 @@ export class HealthCheckStatus {
   readonly status = input<string | undefined>();
   readonly errorMessage = input<string | undefined>();
 
-  readonly description = input.required<string>();
   readonly actionLabel = input.required<string>();
   readonly loadingLabel = input.required<string>();
   readonly statusLabel = input.required<string>();
 
   readonly checkRequested = output<void>();
+
+  protected requestCheck(): void {
+    this.checkRequested.emit();
+  }
 }

@@ -13,22 +13,9 @@ describe('HealthCheckStatus', () => {
 
     fixture = TestBed.createComponent(HealthCheckStatus);
 
-    fixture.componentRef.setInput(
-      'description',
-      'Check whether the service is available.',
-    );
-    fixture.componentRef.setInput(
-      'actionLabel',
-      'Check service health',
-    );
-    fixture.componentRef.setInput(
-      'loadingLabel',
-      'Checking service health...',
-    );
-    fixture.componentRef.setInput(
-      'statusLabel',
-      'Service status:',
-    );
+    fixture.componentRef.setInput('actionLabel', 'Check service health');
+    fixture.componentRef.setInput('loadingLabel', 'Checking service health...');
+    fixture.componentRef.setInput('statusLabel', 'Service status:');
     fixture.componentRef.setInput('isLoading', false);
 
     fixture.detectChanges();
@@ -38,11 +25,7 @@ describe('HealthCheckStatus', () => {
     return fixture.nativeElement.querySelector(selector);
   }
 
-  it('renders the supplied presentation text', () => {
-    expect(fixture.nativeElement.textContent).toContain(
-      'Check whether the service is available.',
-    );
-
+  it('renders the supplied action label', () => {
     expect(query<HTMLButtonElement>('button')?.textContent).toContain('Check service health');
   });
 
@@ -54,7 +37,6 @@ describe('HealthCheckStatus', () => {
     const listener = vi.fn();
 
     fixture.componentInstance.checkRequested.subscribe(listener);
-
     query<HTMLButtonElement>('button')?.click();
 
     expect(listener).toHaveBeenCalledOnce();
@@ -65,15 +47,11 @@ describe('HealthCheckStatus', () => {
     fixture.detectChanges();
 
     expect(query<HTMLButtonElement>('button')?.disabled).toBe(true);
-
     expect(query('[role="status"]')?.textContent).toContain('Checking service health...');
   });
 
   it('shows an error', () => {
-    fixture.componentRef.setInput(
-      'errorMessage',
-      'Request failed.',
-    );
+    fixture.componentRef.setInput('errorMessage', 'Request failed.');
     fixture.detectChanges();
 
     expect(query('[role="alert"]')?.textContent).toContain('Request failed.');
@@ -84,36 +62,26 @@ describe('HealthCheckStatus', () => {
     fixture.detectChanges();
 
     expect(query('[role="status"]')?.textContent).toContain('Service status:');
-
     expect(query('strong')?.textContent?.trim()).toBe('ok');
   });
 
   it('prefers loading over error and status', () => {
     fixture.componentRef.setInput('isLoading', true);
-    fixture.componentRef.setInput(
-      'errorMessage',
-      'Request failed.',
-    );
+    fixture.componentRef.setInput('errorMessage', 'Request failed.');
     fixture.componentRef.setInput('status', 'ok');
     fixture.detectChanges();
 
     expect(query('[role="status"]')?.textContent).toContain('Checking service health...');
-
     expect(query('[role="alert"]')).toBeNull();
-
     expect(query('strong')).toBeNull();
   });
 
   it('prefers error over a previous status', () => {
-    fixture.componentRef.setInput(
-      'errorMessage',
-      'Request failed.',
-    );
+    fixture.componentRef.setInput('errorMessage', 'Request failed.');
     fixture.componentRef.setInput('status', 'ok');
     fixture.detectChanges();
 
     expect(query('[role="alert"]')).not.toBeNull();
-
     expect(query('strong')).toBeNull();
   });
 });

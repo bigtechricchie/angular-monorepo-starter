@@ -45,10 +45,8 @@ describe('Health', () => {
     expect(query('h2')?.textContent).toContain('Health');
   });
 
-  it('shows no status or alert before a check', () => {
-    expect(query('[role="status"]')).toBeNull();
-    expect(query('[role="alert"]')).toBeNull();
-    expect(query('strong')).toBeNull();
+  it('renders the page description', () => {
+    expect(query('p')?.textContent).toContain('Check whether the API is available.');
   });
 
   it('checks API health when requested', () => {
@@ -57,59 +55,24 @@ describe('Health', () => {
     expect(healthApi.checkHealth).toHaveBeenCalledOnce();
   });
 
-  it('shows loading state and disables the button', () => {
+  it('passes loading state to the shared health status', () => {
     healthApi.isLoading.set(true);
     fixture.detectChanges();
 
     expect(query<HTMLButtonElement>('button')?.disabled).toBe(true);
-    expect(query('[role="status"]')?.textContent).toContain(
-      'Checking API health...',
-    );
   });
 
-  it('shows an error message', () => {
+  it('passes error state to the shared health status', () => {
     healthApi.errorMessage.set('Request failed.');
     fixture.detectChanges();
 
-    expect(query('[role="alert"]')?.textContent).toContain(
-      'Request failed.',
-    );
+    expect(query('[role="alert"]')?.textContent).toContain('Request failed.');
   });
 
-  it('shows a successful health response', () => {
-    healthApi.response.set({
-      status: 'ok',
-    });
+  it('passes response status to the shared health status', () => {
+    healthApi.response.set({ status: 'ok' });
     fixture.detectChanges();
 
-    expect(query('[role="status"]')?.textContent).toContain('API status:');
     expect(query('strong')?.textContent?.trim()).toBe('ok');
-  });
-
-  it('prefers the loading state over an error or previous response', () => {
-    healthApi.isLoading.set(true);
-    healthApi.errorMessage.set('Request failed.');
-    healthApi.response.set({
-      status: 'ok',
-    });
-    fixture.detectChanges();
-
-    expect(query('[role="status"]')?.textContent).toContain(
-      'Checking API health...',
-    );
-    expect(query('[role="alert"]')).toBeNull();
-    expect(query('strong')).toBeNull();
-  });
-
-  it('prefers the error over a previous response', () => {
-    healthApi.errorMessage.set('Request failed.');
-    healthApi.response.set({
-      status: 'ok',
-    });
-    fixture.detectChanges();
-
-    expect(query('[role="alert"]')).not.toBeNull();
-    expect(query('[role="status"]')).toBeNull();
-    expect(query('strong')).toBeNull();
   });
 });
