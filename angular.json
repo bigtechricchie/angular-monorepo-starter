@@ -19,7 +19,8 @@
             "browser": "projects/reference-app/src/main.ts",
             "tsConfig": "projects/reference-app/tsconfig.app.json",
             "styles": [
-              "projects/reference-app/src/styles/styles.css"
+              "libs/styles/index.css",
+              "projects/reference-app/src/styles.css"
             ]
           },
           "configurations": {
@@ -77,7 +78,8 @@
             "browser": "projects/portal-app/src/main.ts",
             "tsConfig": "projects/portal-app/tsconfig.app.json",
             "styles": [
-              "projects/portal-app/src/styles/styles.css"
+              "libs/styles/index.css",
+              "projects/portal-app/src/styles.css"
             ]
           },
           "configurations": {

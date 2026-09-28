@@ -9,6 +9,8 @@
     "pnpm": "12.3.4"
   },
   "scripts": {
+    "build:reference-app": "ng build reference-app",
+    "build:portal-app": "ng build portal-app",
     "dev:reference-app": "ng serve reference-app",
     "dev:portal-app": "ng serve portal-app",
     "test:reference-app": "ng test reference-app",

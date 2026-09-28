@@ -94,6 +94,14 @@ while read -r _ local_sha _ remote_sha; do
     run_ui_lib=true
   fi
 
+  # Shared styles affect both Angular applications.
+  if grep -q \
+    '^libs/styles/' \
+    <<< "$changed_files"
+  then
+    run_all=true
+  fi
+
   if grep -q \
     '^projects/reference-app/' \
     <<< "$changed_files"

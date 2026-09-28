@@ -28,6 +28,7 @@ Backend services are independently executable and do not need to mirror frontend
 - Inspect generated framework output before adopting or modifying it.
 - Keep generated artifacts out of source control.
 - Pin tool and direct dependency versions exactly.
+- Prefer static, native CSS over runtime styling dependencies.
 
 The repository is constructed incrementally, one coherent commit at a time, so its Git history explains how the architecture evolves and why each piece exists.
 
@@ -40,42 +41,35 @@ projects/
 
 libs/
 ├── api/              Framework-neutral API contracts and runtime parsers
-└── ui/               Shared presentational Angular components
+├── ui/               Shared presentational Angular components
+└── styles/           Shared static CSS foundation
 
 services/
 └── api/              Generic Go HTTP API
 
-tools/                Repository tooling and native Git hooks
+tools/                 Repository tooling and native Git hooks
 ```
 
-Additional applications, libraries, and services are introduced only when a concrete requirement justifies them.
+Additional applications, libraries, services, and abstractions are introduced only when a concrete requirement justifies them.
 
 Repository-specific documentation:
 
 - [`projects/reference-app/README.md`](projects/reference-app/README.md) - reference application purpose, architectural boundaries, and development.
-- [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal
-  application development, testing, routes, and API integration.
-- [`libs/README.md`](libs/README.md) - shared library architecture,
-  dependency direction, and tooling principles.
-- [`libs/api/README.md`](libs/api/README.md) - API contracts, runtime
-  validation, and framework-neutral library boundaries.
-- [`libs/ui/README.md`](libs/ui/README.md) - shared Angular presentation,
-  component boundaries, and Angular-aware testing.
-- [`services/api/README.md`](services/api/README.md) - API setup, health
-  endpoint, tests, and development checks.
-- [`tools/README.md`](tools/README.md) - repository tooling, native Git
-  hooks, and hook installation.
-- [`docs/security-decisions.md`](docs/security-decisions.md) -
-  security-oriented design decisions, trust boundaries, and deliberate
-  tooling choices.
-- [`docs/solving-dependency-vulnerabilities.md`](docs/solving-dependency-vulnerabilities.md) -
-  investigation and remediation workflow for dependency security advisories.
+- [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal application development, testing, routes, and API integration.
+- [`libs/README.md`](libs/README.md) - shared library architecture, dependency direction, and tooling principles.
+- [`libs/api/README.md`](libs/api/README.md) - API contracts, runtime validation, and framework-neutral boundaries.
+- [`libs/ui/README.md`](libs/ui/README.md) - shared Angular presentation and Angular-aware testing.
+- [`libs/styles/README.md`](libs/styles/README.md) - shared design tokens, reset, document styles, shell layout, and CSS ownership rules.
+- [`services/api/README.md`](services/api/README.md) - API setup, health endpoint, tests, and development checks.
+- [`tools/README.md`](tools/README.md) - repository tooling, native Git hooks, and hook installation.
+- [`docs/security-decisions.md`](docs/security-decisions.md) - security-oriented design decisions, trust boundaries, and deliberate tooling choices.
+- [`docs/solving-dependency-vulnerabilities.md`](docs/solving-dependency-vulnerabilities.md) - dependency advisory investigation and remediation workflow.
 
 ## Applications
 
 ### Reference App
 
-`reference-app` is the first Angular application and a permanent part of the starter.
+`reference-app` is a permanent part of the starter.
 
 It acts as an executable architecture guide and UI styleguide that demonstrates the canonical composition patterns of the monorepo.
 
@@ -106,19 +100,36 @@ It owns reusable API boundaries such as:
 
 Network data is treated as untrusted until it passes runtime validation.
 
-The library does not depend on Angular, browser APIs, or application code.
+The library does not depend on Angular, browser APIs, RxJS, or application code.
 
 ### UI Library
 
 `@lib/ui` contains shared presentational Angular components.
 
-Applications pass presentation-ready state through inputs, and components
-communicate user intent through outputs.
+Applications pass presentation-ready state through inputs, and components communicate user intent through outputs.
 
-The UI library does not own backend calls, HTTP resources, routing, or
-application state.
+The UI library does not own backend calls, HTTP resources, routing, or application state.
 
 It is consumed directly from source and is not packaged or published.
+
+### Shared Styles
+
+`libs/styles` contains the shared static CSS foundation.
+
+It owns:
+
+- design tokens
+- browser normalization
+- base document styles
+- shared application-shell layout
+
+Component-specific CSS remains with components.
+
+Application-specific global CSS remains with applications.
+
+The styling layer uses native static CSS, system fonts, and no runtime styling framework or external font service.
+
+Selected CSS custom properties are registered with `@property` when a useful value type can be constrained. Property registration is defense in depth for token correctness and predictability; it is not a substitute for preventing untrusted values from becoming arbitrary CSS.
 
 ## Development
 
@@ -134,11 +145,13 @@ Run the reference application:
 pnpm run dev:reference-app
 ```
 
-Run the portal application:
+Run the Portal application:
 
 ```text
 pnpm run dev:portal-app
 ```
+
+## Build
 
 Build the reference application:
 
@@ -146,7 +159,7 @@ Build the reference application:
 pnpm run build:reference-app
 ```
 
-Build the portal application:
+Build the Portal application:
 
 ```text
 pnpm run build:portal-app
@@ -154,7 +167,7 @@ pnpm run build:portal-app
 
 ## Type checking
 
-Type-check shared libraries:
+Type-check shared TypeScript libraries:
 
 ```text
 pnpm run typecheck:libs
@@ -170,7 +183,7 @@ Run the reference application tests:
 pnpm run test:reference-app --watch=false
 ```
 
-Run the portal application tests:
+Run the Portal application tests:
 
 ```text
 pnpm run test:portal-app --watch=false
@@ -188,13 +201,13 @@ Run the Angular UI library tests:
 pnpm run test:ui-lib --watch=false
 ```
 
-Run all library tests:
+Run all TypeScript and Angular library tests:
 
 ```text
 pnpm run test:libs
 ```
 
-The library test commands intentionally use different test pipelines:
+The library test commands intentionally use different pipelines:
 
 ```text
 api-lib
@@ -206,19 +219,17 @@ ui-lib
 → Vitest + DOM environment
 ```
 
+`libs/styles` has no independent test target. Shared style changes are exercised through both Angular applications by the pre-push gate.
+
 ## API service
 
-The generic Go API is documented separately in
-[`services/api/README.md`](services/api/README.md).
+The generic Go API is documented separately in [`services/api/README.md`](services/api/README.md).
 
-The frontend applications use the API through application-owned integration
-services while shared endpoint contracts and runtime parsers live in
-`@lib/api`.
+Frontend applications own request orchestration while reusable endpoint contracts and runtime parsers live in `@lib/api`.
 
 ## Repository tooling
 
-Native Git hooks provide local security and quality gates without adding a
-hook framework dependency.
+Native Git hooks provide local security and quality gates without introducing a hook framework dependency.
 
 Install the tracked hooks after cloning:
 
@@ -226,8 +237,9 @@ Install the tracked hooks after cloning:
 bash tools/scripts/setup-hooks.sh
 ```
 
-The pre-push gate runs a dependency audit and selects relevant library and
-application tests based on the files being pushed.
+The pre-push gate runs a dependency security audit and selects relevant library and application tests based on the files being pushed.
+
+Shared style changes exercise both Angular applications.
 
 See [`tools/README.md`](tools/README.md) for details.
 

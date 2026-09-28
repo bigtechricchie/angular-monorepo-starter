@@ -15,12 +15,8 @@ applications.
 
 `libs/api` owns framework-neutral API contracts and runtime boundary logic.
 
-It contains:
-
-- endpoint definitions
-- response contracts
-- runtime parsers
-- contract-specific errors
+It contains endpoint definitions, response contracts, runtime parsers, and
+contract-specific errors.
 
 It does not depend on Angular, browser APIs, application code, or RxJS.
 
@@ -38,17 +34,34 @@ communication.
 
 See [`ui/README.md`](ui/README.md).
 
+### Shared styles
+
+`libs/styles` owns the static CSS foundation shared by applications.
+
+It currently contains:
+
+- design tokens
+- browser normalization
+- base document styles
+- shared application-shell layout
+
+Component-specific CSS remains with components, and application-specific
+global CSS remains with applications.
+
+See [`styles/README.md`](styles/README.md).
+
 ## Dependency direction
 
 ```text
 applications
 ├── @lib/api
-└── @lib/ui
+├── @lib/ui
+└── libs/styles
 ```
 
 Libraries must never import from an application.
 
-Libraries may have different tooling depending on their capability.
+Different capabilities use different tooling:
 
 ```text
 libs/api
@@ -60,22 +73,24 @@ libs/ui
 → Angular
 → Angular unit-test builder
 → Vitest + DOM environment
+
+libs/styles
+→ static CSS
+→ no runtime dependency
 ```
 
-Use the lightest tooling that correctly supports each library.
+Use the lightest tooling that correctly supports each capability.
 
 ## TypeScript
 
-Shared library TypeScript defaults live in:
+Shared TypeScript library defaults live in:
 
 ```text
 libs/tsconfig.json
 ```
 
-Individual libraries extend that configuration when they need stronger
-environment boundaries.
-
-For example:
+Individual TypeScript libraries extend that configuration when their
+environment requirements differ.
 
 ```text
 libs/api
@@ -86,6 +101,9 @@ libs/ui
 → ES2022 + DOM
 → browser presentation is intentional
 ```
+
+`libs/styles` is CSS-only and does not participate in the TypeScript
+configuration.
 
 ## Testing
 
@@ -101,28 +119,36 @@ Run Angular UI library tests:
 pnpm run test:ui-lib --watch=false
 ```
 
-Run all library tests:
+Run all TypeScript and Angular library tests:
 
 ```text
 pnpm run test:libs
 ```
 
+`libs/styles` has no independent test target. Changes to shared styles cause
+both Angular application suites to run through the pre-push gate.
+
 ## Public APIs
 
-Applications should import libraries through their public aliases:
+Applications import TypeScript libraries through their public aliases:
 
 ```ts
 import { healthEndpoint } from '@lib/api';
 import { HealthCheckStatus } from '@lib/ui';
 ```
 
-Do not deep-import implementation files from another library.
+Do not deep-import implementation files from another TypeScript library.
 
-Each library exposes its supported surface through:
+Each TypeScript library exposes its supported surface through
+`src/public-api.ts`.
+
+Shared CSS is loaded through:
 
 ```text
-src/public-api.ts
+libs/styles/index.css
 ```
+
+Applications should not import individual shared style files directly.
 
 ## Principles
 
@@ -132,4 +158,5 @@ src/public-api.ts
 - Do not add packaging or publishing infrastructure without a concrete need.
 - Keep framework-neutral libraries framework-neutral.
 - Keep application orchestration inside applications.
+- Keep shared CSS static and dependency-light.
 - Add abstractions only after reuse or a clear boundary has been demonstrated.

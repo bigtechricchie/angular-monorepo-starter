@@ -1,12 +1,10 @@
-@import "./reset.css";
+/* App-specific styles for portal-app.
 
-/* App-specific styles for reference-app.
-
-   Host bridge: app-reference-root sits between body and .app; without this
+   Host bridge: app-portal-root sits between body and .app; without this
    it defaults to display: block and breaks the flex chain. Structural
    properties only - never visual styling on the host. */
 
-app-reference-root {
+app-portal-root {
   flex: 1;
   display: flex;
   min-inline-size: 0;
