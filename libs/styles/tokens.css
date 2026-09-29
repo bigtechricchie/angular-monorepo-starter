@@ -10,6 +10,12 @@
   initial-value: #1a1c1e;
 }
 
+@property --color-focus {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #005fcc;
+}
+
 @property --space-4 {
   syntax: '<length>';
   inherits: false;
@@ -31,6 +37,7 @@
 :root {
   --color-surface: #fdfcff;
   --color-on-surface: #1a1c1e;
+  --color-focus: #005fcc;
 
   --space-4: 1rem;
 

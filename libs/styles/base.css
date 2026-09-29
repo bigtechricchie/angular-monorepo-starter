@@ -14,3 +14,14 @@ body {
   flex-direction: column;
   min-inline-size: 0;
 }
+
+/* Keep pressed links visually consistent with the shared focus colour. */
+a:active {
+  color: var(--color-focus);
+}
+
+/* Use a consistent keyboard focus indicator independent of text colour. */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
