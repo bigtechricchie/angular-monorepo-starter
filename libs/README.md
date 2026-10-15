@@ -6,8 +6,7 @@ The repository follows:
 
 > **Applications own composition. Libraries own capabilities.**
 
-Applications may depend on libraries. Libraries must not depend on
-applications.
+Applications may depend on libraries. Libraries must not depend on applications.
 
 ## Libraries
 
@@ -15,22 +14,31 @@ applications.
 
 `libs/api` owns framework-neutral API contracts and runtime boundary logic.
 
-It contains endpoint definitions, response contracts, runtime parsers, and
-contract-specific errors.
+It contains endpoint definitions, response contracts, runtime parsers, and contract-specific errors.
 
 It does not depend on Angular, browser APIs, application code, or RxJS.
 
 See [`api/README.md`](api/README.md).
 
+### `@lib/i18n`
+
+`libs/i18n` owns framework-neutral translation contracts and translated content that are genuinely shared by applications.
+
+Application-specific translations remain owned by each application.
+
+The library currently centralizes English user-facing text and deliberately does not provide runtime locale switching.
+
+It does not depend on Angular, RxJS, browser APIs, or application code.
+
+See [`i18n/README.md`](i18n/README.md).
+
 ### `@lib/ui`
 
 `libs/ui` owns reusable presentational Angular components.
 
-Components receive presentation state through inputs and communicate user
-intent through outputs.
+Components receive presentation state through inputs and communicate user intent through outputs.
 
-They do not own HTTP requests, routing, application state, or backend
-communication.
+They do not own HTTP requests, routing, application state, or backend communication.
 
 See [`ui/README.md`](ui/README.md).
 
@@ -45,8 +53,7 @@ It currently contains:
 - base document styles
 - shared application-shell layout
 
-Component-specific CSS remains with components, and application-specific
-global CSS remains with applications.
+Component-specific CSS remains with components, and application-specific global CSS remains with applications.
 
 See [`styles/README.md`](styles/README.md).
 
@@ -55,6 +62,7 @@ See [`styles/README.md`](styles/README.md).
 ```text
 applications
 ├── @lib/api
+├── @lib/i18n
 ├── @lib/ui
 └── libs/styles
 ```
@@ -68,6 +76,11 @@ libs/api
 → TypeScript
 → plain Vitest
 → Node environment
+
+libs/i18n
+→ TypeScript
+→ compile-time translation contracts
+→ framework-neutral
 
 libs/ui
 → Angular
@@ -89,11 +102,14 @@ Shared TypeScript library defaults live in:
 libs/tsconfig.json
 ```
 
-Individual TypeScript libraries extend that configuration when their
-environment requirements differ.
+Individual TypeScript libraries extend that configuration when their environment requirements differ.
 
 ```text
 libs/api
+→ ES2022 only
+→ no DOM APIs
+
+libs/i18n
 → ES2022 only
 → no DOM APIs
 
@@ -102,8 +118,7 @@ libs/ui
 → browser presentation is intentional
 ```
 
-`libs/styles` is CSS-only and does not participate in the TypeScript
-configuration.
+`libs/styles` is CSS-only and does not participate in the TypeScript configuration.
 
 ## Testing
 
@@ -119,14 +134,25 @@ Run Angular UI library tests:
 pnpm run test:ui-lib --watch=false
 ```
 
-Run all TypeScript and Angular library tests:
+Run all runtime library tests:
 
 ```text
 pnpm run test:libs
 ```
 
-`libs/styles` has no independent test target. Changes to shared styles cause
-both Angular application suites to run through the pre-push gate.
+Type-check all TypeScript libraries:
+
+```text
+pnpm run typecheck:libs
+```
+
+`libs/i18n` currently has no independent runtime test target because it contains static translation objects and compile-time contracts only.
+
+Its schema and translation objects are validated through TypeScript type checking and through the Angular applications that consume them.
+
+`libs/styles` has no independent test target. Changes to shared styles cause both Angular application suites to run through the pre-push gate.
+
+Changes to `libs/i18n` also affect both Angular applications and are exercised through the pre-push gate.
 
 ## Public APIs
 
@@ -134,13 +160,13 @@ Applications import TypeScript libraries through their public aliases:
 
 ```ts
 import { healthEndpoint } from '@lib/api';
+import { SHARED_TRANSLATION } from '@lib/i18n';
 import { HealthCheckStatus } from '@lib/ui';
 ```
 
 Do not deep-import implementation files from another TypeScript library.
 
-Each TypeScript library exposes its supported surface through
-`src/public-api.ts`.
+Each TypeScript library exposes its supported surface through `src/public-api.ts`.
 
 Shared CSS is loaded through:
 
@@ -158,5 +184,7 @@ Applications should not import individual shared style files directly.
 - Do not add packaging or publishing infrastructure without a concrete need.
 - Keep framework-neutral libraries framework-neutral.
 - Keep application orchestration inside applications.
+- Keep shared translation content genuinely shared.
+- Keep application-specific translation content inside applications.
 - Keep shared CSS static and dependency-light.
 - Add abstractions only after reuse or a clear boundary has been demonstrated.

@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { REFERENCE_TRANSLATION } from '../../../i18n';
 import { Home } from './home';
 
 describe('Home', () => {
@@ -20,12 +21,18 @@ describe('Home', () => {
 
   it('renders the architecture reference heading', () => {
     const heading = fixture.debugElement.query(By.css('h2'));
-    expect(heading.nativeElement.textContent).toContain('Architecture reference');
+
+    expect(heading.nativeElement.textContent).toContain(
+      REFERENCE_TRANSLATION.home.title,
+    );
   });
 
   it('renders a link to the health example', () => {
     const link = fixture.debugElement.query(By.css('a[href="/health"]'));
+
     expect(link).not.toBeNull();
-    expect(link?.nativeElement.textContent).toContain('View API health');
+    expect(link.nativeElement.textContent).toContain(
+      REFERENCE_TRANSLATION.home.healthLink,
+    );
   });
 });

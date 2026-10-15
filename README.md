@@ -41,13 +41,14 @@ projects/
 
 libs/
 ├── api/              Framework-neutral API contracts and runtime parsers
+├── i18n/             Shared translation contracts and translated content
 ├── ui/               Shared presentational Angular components
 └── styles/           Shared static CSS foundation
 
 services/
 └── api/              Generic Go HTTP API
 
-tools/                 Repository tooling and native Git hooks
+tools/                Repository tooling and native Git hooks
 ```
 
 Additional applications, libraries, services, and abstractions are introduced only when a concrete requirement justifies them.
@@ -58,6 +59,7 @@ Repository-specific documentation:
 - [`projects/portal-app/README.md`](projects/portal-app/README.md) - portal application development, testing, routes, and API integration.
 - [`libs/README.md`](libs/README.md) - shared library architecture, dependency direction, and tooling principles.
 - [`libs/api/README.md`](libs/api/README.md) - API contracts, runtime validation, and framework-neutral boundaries.
+- [`libs/i18n/README.md`](libs/i18n/README.md) - shared translation contracts, ownership rules, and localization boundaries.
 - [`libs/ui/README.md`](libs/ui/README.md) - shared Angular presentation and Angular-aware testing.
 - [`libs/styles/README.md`](libs/styles/README.md) - shared design tokens, reset, document styles, shell layout, and CSS ownership rules.
 - [`services/api/README.md`](services/api/README.md) - API setup, health endpoint, tests, and development checks.
@@ -101,6 +103,16 @@ It owns reusable API boundaries such as:
 Network data is treated as untrusted until it passes runtime validation.
 
 The library does not depend on Angular, browser APIs, RxJS, or application code.
+
+### I18n Library
+
+`@lib/i18n` contains framework-neutral translation contracts and translated content that are genuinely shared across applications.
+
+Application-specific wording remains owned by each application.
+
+The starter currently centralizes English user-facing text without introducing runtime locale switching, Angular services, providers, or third-party i18n dependencies.
+
+The library is consumed directly from source and is not packaged or published.
 
 ### UI Library
 
@@ -201,7 +213,7 @@ Run the Angular UI library tests:
 pnpm run test:ui-lib --watch=false
 ```
 
-Run all TypeScript and Angular library tests:
+Run all library tests:
 
 ```text
 pnpm run test:libs
@@ -214,12 +226,18 @@ api-lib
 → plain Vitest
 → Node environment
 
+i18n
+→ compile-time validation
+→ no runtime test target yet
+
 ui-lib
 → Angular unit-test builder
 → Vitest + DOM environment
 ```
 
 `libs/styles` has no independent test target. Shared style changes are exercised through both Angular applications by the pre-push gate.
+
+`libs/i18n` currently has no independent runtime test target because it contains static translation data and compile-time contracts only. Its schema and translation objects are validated through TypeScript type checking and through their application consumers.
 
 ## API service
 
@@ -238,6 +256,8 @@ bash tools/scripts/setup-hooks.sh
 ```
 
 The pre-push gate runs a dependency security audit and selects relevant library and application tests based on the files being pushed.
+
+Changes to shared i18n content exercise both Angular applications.
 
 Shared style changes exercise both Angular applications.
 

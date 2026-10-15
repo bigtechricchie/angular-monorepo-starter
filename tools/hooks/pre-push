@@ -9,6 +9,7 @@ run_portal=false
 run_all=false
 run_all_libs=false
 run_api_lib=false
+run_i18n_lib=false
 run_ui_lib=false
 
 while read -r _ local_sha _ remote_sha; do
@@ -85,6 +86,15 @@ while read -r _ local_sha _ remote_sha; do
     run_api_lib=true
   fi
 
+  # I18n library changes affect the library and both consumers.
+  if grep -q \
+    '^libs/i18n/' \
+    <<< "$changed_files"
+  then
+    run_all=true
+    run_i18n_lib=true
+  fi
+
   # UI library changes affect the library and both consumers.
   if grep -q \
     '^libs/ui/' \
@@ -121,7 +131,10 @@ if [ "$run_all_libs" = true ]; then
   pnpm run typecheck:libs
   pnpm run test:libs
 else
-  if [ "$run_api_lib" = true ] || [ "$run_ui_lib" = true ]; then
+  if [ "$run_api_lib" = true ] ||
+    [ "$run_i18n_lib" = true ] ||
+    [ "$run_ui_lib" = true ]
+  then
     pnpm run typecheck:libs
   fi
 

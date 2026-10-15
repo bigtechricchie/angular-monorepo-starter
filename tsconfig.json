@@ -21,6 +21,9 @@
       "@lib/api": [
         "./libs/api/src/public-api.ts"
       ],
+      "@lib/i18n": [
+        "./libs/i18n/src/public-api.ts"
+      ],
       "@lib/ui": [
         "./libs/ui/src/public-api.ts"
       ]
