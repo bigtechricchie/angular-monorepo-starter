@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { PORTAL_TRANSLATION } from '../i18n';
 import { App } from './app';
 
 describe('App', () => {
@@ -22,30 +23,30 @@ describe('App', () => {
     const heading = fixture.debugElement.query(By.css('h1'));
 
     expect(heading.nativeElement.textContent).toContain(
-      'Portal App',
+      PORTAL_TRANSLATION.app.title,
     );
   });
 
   it('renders primary navigation', () => {
-    const navigation = fixture.debugElement.query(
-      By.css('nav[aria-label="Primary navigation"]'),
-    );
+    const navigation = fixture.debugElement.query(By.css('nav'));
 
     expect(navigation).not.toBeNull();
+    expect(navigation.attributes['aria-label']).toBe(
+      PORTAL_TRANSLATION.navigation.label,
+    );
   });
 
   it('renders links to Home and Health', () => {
-    const homeLink = fixture.debugElement.query(
-      By.css('a[href="/"]'),
-    );
-
+    const homeLink = fixture.debugElement.query(By.css('a[href="/"]'));
     const healthLink = fixture.debugElement.query(
       By.css('a[href="/health"]'),
     );
 
-    expect(homeLink.nativeElement.textContent).toContain('Home');
+    expect(homeLink.nativeElement.textContent).toContain(
+      PORTAL_TRANSLATION.navigation.home,
+    );
     expect(healthLink.nativeElement.textContent).toContain(
-      'Health',
+      PORTAL_TRANSLATION.navigation.health,
     );
   });
 });

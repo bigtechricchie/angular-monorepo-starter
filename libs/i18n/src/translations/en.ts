@@ -10,7 +10,7 @@ export const SHARED_TRANSLATION = {
     title: 'Health',
     description: 'Check whether the API is available.',
     actionLabel: 'Check API health',
-    loadingLabel: 'Checking API health...',
+    loadingLabel: 'Checking API health…',
     statusLabel: 'API status:',
   },
 } as const satisfies SharedTranslation;

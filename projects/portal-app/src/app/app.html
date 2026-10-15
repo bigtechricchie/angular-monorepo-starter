@@ -2,7 +2,7 @@
   <header class="app__header">
     <h1 class="app__title">{{ translation.app.title }}</h1>
 
-    <nav class="app__navigation" aria-label="Primary navigation">
+    <nav class="app__navigation" [attr.aria-label]="translation.navigation.label">
       <a class="app__navigation-link" routerLink="/" routerLinkActive="app__navigation-link--active"
         [routerLinkActiveOptions]="{ exact: true }">
         {{ translation.navigation.home }}

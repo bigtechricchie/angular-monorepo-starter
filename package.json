@@ -18,7 +18,7 @@
     "test:api-lib": "vitest run --config libs/vitest.config.ts",
     "test:ui-lib": "ng test ui-lib",
     "test:libs": "pnpm run test:api-lib && pnpm run test:ui-lib --watch=false",
-    "typecheck:libs": "tsc --project libs/api/tsconfig.json && tsc --project libs/ui/tsconfig.json"
+    "typecheck:libs": "tsc --project libs/api/tsconfig.json && tsc --project libs/i18n/tsconfig.json && tsc --project libs/ui/tsconfig.json"
   },
   "dependencies": {
     "@angular/common": "22.2.2",
