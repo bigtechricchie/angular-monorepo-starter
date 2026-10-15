@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { REFERENCE_TRANSLATION } from '../i18n';
 
 @Component({
   selector: 'app-reference-root',
@@ -12,5 +13,5 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 })
 export class App {
-  protected readonly title = signal('Reference App');
+  protected readonly translation = REFERENCE_TRANSLATION;
 }

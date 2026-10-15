@@ -1,7 +1,11 @@
 <section>
-  <h2>Home</h2>
+  <h2>{{ translation.title }}</h2>
+
   <p>
-    Application portal.
+    {{ translation.description }}
   </p>
-  <a routerLink="/health">Check API health status</a>
+
+  <a routerLink="/health">
+    {{ translation.healthLink }}
+  </a>
 </section>
